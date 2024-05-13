@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Lista de Aniversário</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+            rel="stylesheet"
+        />
+        <link rel="stylesheet" href="style.css" />
+    </head>
+    <body>
+        <div class="container">
+            <div class="novaPessoa">
+                <form action="/novo" method="post">
+                    <input
+                        required
+                        autocomplete="off"
+                        type="text"
+                        name="nome"
+                        id="nome"
+                    />
+                    <input
+                        required
+                        autocomplete="off"
+                        type="date"
+                        name="datanasc"
+                        id="datanasc"
+                    />
+                    <button>Adicionar</button>
+                </form>
+            </div>
+            <div class="aniversariantes hidden">
+                <h2 class="h2Aniver">Aniversariantes</h2>
+                <ul class="aniversariando"></ul>
+            </div>
+            <% if (locals.aniversariantes.length > 0) { %>
+            <div class="lista">
+                <ul id="lista" class="hidden">
+                    <% for( let i = 0; i < aniversariantes.length; i++ ) { %>
+                    <li>
+                        <h2 title=""><%= aniversariantes[i].nome %></h2>
+                        <p class="pDatas"><%= datasOfc[i] %></p>
+                        <p class="diasFaltando"></p>
+                        <form action="/deletar" method="post">
+                            <input
+                                type="hidden"
+                                name="idDeletar"
+                                value="<%= aniversariantes[i].id %>"
+                            />
+                            <button>🗑️</button>
+                        </form>
+                    </li>
+                    <% } %>
+                </ul>
+            </div>
+            <% } %>
+
+            <button class="mostrar">Mostrar lista</button>
+        </div>
+
+        <script>
+            document.querySelector(".mostrar").addEventListener("click", () => {
+                document.querySelector("#lista").classList.toggle("hidden");
+                if (
+                    document
+                        .querySelector("#lista")
+                        .classList.contains("hidden")
+                ) {
+                    document.querySelector(".mostrar").textContent =
+                        "Mostrar lista";
+                } else {
+                    document.querySelector(".mostrar").textContent =
+                        "Ocultar lista";
+                }
+            });
+
+            let dataAtual = new Date();
+
+            const allPs = document.querySelectorAll(".pDatas");
+            allPs.forEach((p) => {
+                const y = Number(p.textContent.split("/").at(-1));
+                const age = dataAtual.getFullYear() - y;
+
+                const aniverSplice = p.textContent.split("/").splice(0, 2);
+                const aniver = aniverSplice.join("/");
+                const dia = `${new Date().getDate()}`.padStart(2, 0);
+                const mes = `${new Date().getMonth() + 1}`.padStart(2, 0);
+                const dataNiver = `${dia}/${mes}`;
+
+                console.log(aniverSplice);
+
+                const diasFaltam = new Date(
+                    `${new Date().getFullYear()}-${Number(
+                        aniverSplice[1]
+                    )}-${Number(aniverSplice[0])}`
+                );
+
+                let tempoFalta = Math.ceil(
+                    (+diasFaltam - +dataAtual) / (1000 * 60 * 60 * 24)
+                );
+
+                if (tempoFalta < 0) {
+                    const diasFaltamAtual = new Date(
+                        `${new Date().getFullYear() + 1}-${Number(
+                            aniverSplice[1]
+                        )}-${Number(aniverSplice[0])}`
+                    );
+
+                    tempoFalta = Math.ceil(
+                        (+diasFaltamAtual - +dataAtual) / (1000 * 60 * 60 * 24)
+                    );
+                }
+
+                console.log(tempoFalta);
+
+                p.parentElement.children[2].textContent = `Faltam ${tempoFalta} dias!`;
+
+                p.parentElement.children[0].title = `${age}`;
+
+                if (aniver === dataNiver) {
+                    p.parentElement.classList.add("aniversario");
+                    p.parentElement.children[2].textContent = `Parabéns!🎉 É seu aniversário!🎂 `;
+
+                    document
+                        .querySelector(".aniversariantes ul")
+                        .insertAdjacentHTML(
+                            "beforeend",
+                            `<li><h2>🎉${p.parentElement.children[0].textContent}🎉</h2></li>`
+                        );
+                }
+            });
+
+            if (document.querySelector(".aniversariando").textContent) {
+                document
+                    .querySelector(".aniversariantes")
+                    .classList.remove("hidden");
+            }
+        </script>
+    </body>
+</html>
